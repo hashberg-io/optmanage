@@ -19,15 +19,15 @@ An option manager object can then be obtained by instantiating the option manage
     class MyOptions(OptionManager):
         """ Options of some library. """
 
-        validate = Option(True, bool)
+        validate = Option(bool, True)
         """ Whether to validate arguments to functions and methods. """
 
-        eq_atol = Option(1e-8, float, lambda x: x >= 0)
+        eq_atol = Option(float, 1e-8, lambda x: x >= 0)
         """ Absolute tolerance used for equality comparisons."""
 
         scaling: Option(
-            {"x": 1.0, "y": 2.0, "z": 1.0},
             Mapping[Literal["x", "y", "z"], float],
+            {"x": 1.0, "y": 2.0, "z": 1.0},
             lambda scaling: all(v >= 0 for v in scaling.values())
         )
         """ Scaling for coordinate axes used in plots.  """
@@ -39,10 +39,10 @@ Each option takes a default value, a type, and an optional validator function:
 
 .. code-block:: python
 
-    validate = Option(True, bool)
-    #   default value ^^^^  ^^^^ option type
+    validate = Option(bool, True)
+    #     option type ^^^^  ^^^^ default value
 
-    eq_atol = Option(1e-8, float, lambda x: x >= 0)
+    eq_atol = Option(float, 1e-8, lambda x: x >= 0)
     #           optional validator ^^^^^^^^^^^^^^^^
 
 Any type supported by the `typing-validation <https://github.com/hashberg-io/typing-validation>`_ library can be used for options, including `PEP 484 <https://peps.python.org/pep-0484/>`_ type hints:
@@ -50,8 +50,8 @@ Any type supported by the `typing-validation <https://github.com/hashberg-io/typ
 .. code-block:: python
 
     scaling: Option(
-        {"x": 1.0, "y": 2.0, "z": 1.0},
         Mapping[Literal["x", "y", "z"], float], # <- type hints supported
+        {"x": 1.0, "y": 2.0, "z": 1.0},
         lambda scaling: all(v >= 0 for v in scaling.values())
     )
 

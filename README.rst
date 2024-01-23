@@ -58,30 +58,29 @@ An option manager object can then be obtained by instantiating the option manage
     class MyOptions(OptionManager):
         """ Options of some library. """
 
-        validate = Option(True, bool)
+        validate = Option(bool, True)
         """ Whether to validate arguments to functions and methods. """
 
-        eq_atol = Option(1e-8, float, lambda x: x >= 0)
+        eq_atol = Option(float, 1e-8, lambda x: x >= 0)
         """ Absolute tolerance used for equality comparisons."""
 
         scaling: Option(
-            {"x": 1.0, "y": 2.0, "z": 1.0},
             Mapping[Literal["x", "y", "z"], float],
+            {"x": 1.0, "y": 2.0, "z": 1.0},
             lambda scaling: all(v >= 0 for v in scaling.values())
         )
         """ Scaling for coordinate axes used in plots.  """
 
     options = MyOptions()
 
-
 Each option takes a default value, a type, and an optional validator function:
 
 .. code-block:: python
 
-    validate = Option(True, bool)
-    #   default value ^^^^  ^^^^ option type
+    validate = Option(bool, True)
+    #     option type ^^^^  ^^^^ default value
 
-    eq_atol = Option(1e-8, float, lambda x: x >= 0)
+    eq_atol = Option(float, 1e-8, lambda x: x >= 0)
     #           optional validator ^^^^^^^^^^^^^^^^
 
 Any type supported by the `typing-validation <https://github.com/hashberg-io/typing-validation>`_ library can be used for options, including `PEP 484 <https://peps.python.org/pep-0484/>`_ type hints:
@@ -89,8 +88,8 @@ Any type supported by the `typing-validation <https://github.com/hashberg-io/typ
 .. code-block:: python
 
     scaling: Option(
-        {"x": 1.0, "y": 2.0, "z": 1.0},
         Mapping[Literal["x", "y", "z"], float], # <- type hints supported
+        {"x": 1.0, "y": 2.0, "z": 1.0},
         lambda scaling: all(v >= 0 for v in scaling.values())
     )
 
@@ -120,7 +119,7 @@ It is also possible to use the options object as a context manager, for temporar
     print(options.validate) # True
     print(options.eq_atol)  # 0.00000001
 
-All options can be reset to their default values by using the `reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.manager.html#optmanage.manager.OptionManager.reset>`_ method of the ``options`` object:
+All options can be reset to their default values by using the `OptionManager.reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.manager.html#optmanage.manager.OptionManager.reset>`_ method of the ``options`` object:
 
 .. code-block:: python
 
@@ -131,7 +130,7 @@ All options can be reset to their default values by using the `reset <https://op
     print(options.validate) # True
     print(options.eq_atol)  # 0.00000001
 
-An individual option can be reset to its default value by using the `reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#optmanage.option.Option.reset>`_ method of the `Option <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#option>`_ object, accessed from the option manager class:
+An individual option can be reset to its default value by using the `Option.reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#optmanage.option.Option.reset>`_ method of the `Option <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#option>`_ object, accessed from the option manager class:
 
 .. code-block:: python
 

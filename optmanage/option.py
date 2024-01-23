@@ -74,26 +74,23 @@ class Option(Generic[ValueT]):
 
     def __new__(
         cls,
+        ty: Any,
         default: ValueT,
-        ty: Any = None,
         validator: Validator[ValueT] | None = None,
     ) -> Self:
         """
         Creates a new option descriptor.
         For usage examples, see :class:`OptionManager`.
 
+        :param ty: The type of the option.
         :param default: The default value for the option.
-        :param ty: The type of the option. If not specified, defaults to the
-                   type of the default value.
         :param validator: A callable that takes a value and returns whether
                           it is valid for this option. If not specified,
                           defaults to :obj:`None` (no validation)
 
         :meta public:
         """
-        if ty is None:
-            ty = type(default)
-        elif not can_validate(ty):
+        if not can_validate(ty):
             raise TypeError(f"Cannot validate type {ty!r}.")
         if validator is not None and not callable(validator):
             raise TypeError(f"Expected callable validator, got {validator!r}.")

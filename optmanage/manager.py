@@ -29,13 +29,13 @@ class OptionManager:
         class MyOptions(OptionManager):
             ''' Options of some library. '''
 
-            validate = Option(True, bool)
+            validate = Option(bool, True)
             ''' Whether to validate arguments to  functions and methods. '''
 
-            eq_atol = Option(1e-08, float, lambda x: x >= 0)
+            eq_atol = Option(float, 1e-08, lambda x: x >= 0)
             ''' Absolute tolerance used for equality comparisons.'''
 
-            print_prec = Option(3, int, lambda x: x >= 0)
+            print_prec = Option(int, 3, lambda x: x >= 0)
             ''' Number of decimal digits to be displayed when printing. '''
 
     Each option is defined as a class attribute of type :class:`Option`,
@@ -43,10 +43,10 @@ class OptionManager:
 
     .. code-block:: python
 
-        validate = Option(True, bool)
-        #   default value ^^^^  ^^^^ option type
+        validate = Option(bool, True)
+        #     option type ^^^^  ^^^^ default value
 
-        print_prec = Option(3, int, lambda x: x >= 0)
+        print_prec = Option(int, 3, lambda x: x >= 0)
         #        optional validator ^^^^^^^^^^^^^^^^
 
     The option manager can then be instantiated as usual:

@@ -17,10 +17,10 @@ You can install the latest release from `PyPI <https://pypi.org/project/optmanag
     class MyOptions(OptionManager):
         """ Options of some library. """
 
-        validate = Option(True, bool)
+        validate = Option(bool, True)
         """ Whether to validate arguments to functions and methods. """
 
-        eq_atol = Option(1e-8, float, lambda x: x >= 0)
+        eq_atol = Option(float, 1e-8, lambda x: x >= 0)
         """ Absolute tolerance used for equality comparisons."""
 
     options = MyOptions()
