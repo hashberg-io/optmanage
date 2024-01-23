@@ -38,10 +38,24 @@ ValueT_contra = TypeVar("ValueT_contra", contravariant=True)
 
 class Validator(Protocol[ValueT_contra]):
     """
-    Structura type for an option validator.
+    Structural type for an option validator.
+    There are two ways to signal that a value is invalid:
+
+    - returning :obj:`False`
+    - raising any :class:`Exception`
+
+    There are two ways to signal that a value is valid:
+
+    - returning :obj:`True` (as opposed to :obj:`False`)
+    - returning :obj:`None` (as opposed to raising an exception)
+
+    In the context of option validation, a :obj:`ValueError` will be raised
+    if validation fails: if the validator raised an exception, the
+    :obj:`ValueError` is re-raised from it.
+
     """
 
-    def __call__(self, value: ValueT_contra, /) -> bool:
+    def __call__(self, value: ValueT_contra, /) -> bool|None:
         ...
 
 
@@ -84,9 +98,7 @@ class Option(Generic[ValueT]):
 
         :param ty: The type of the option.
         :param default: The default value for the option.
-        :param validator: A callable that takes a value and returns whether
-                          it is valid for this option. If not specified,
-                          defaults to :obj:`None` (no validation)
+        :param validator: An optional validator function, see :class:`Validator`
 
         :meta public:
         """
@@ -151,16 +163,25 @@ class Option(Generic[ValueT]):
 
         - Checks that the value has the correct type.
         - If a validator is specified, checks that the value is valid.
+
+        If the value is not valid, :obj:`ValueError` is raised.
         """
         validate(value, self.__type)
         if (validator := self.__validator) is not None:
-            if not validator(value):
+            validator_res: bool|None
+            validator_err: Exception|None = None
+            try:
+                validator_res = validator(value)
+            except Exception as e:
+                validator_res = False
+                validator_err = e
+            if validator_res is False:
                 name_str = (
                     f" {self.__name!r}" if hasattr(self, "__name") else ""
                 )
                 raise ValueError(
                     f"Invalid value for option{name_str}: " f"{value!r}."
-                )
+                ) from validator_err
 
     def reset(self, instance: OptionManager) -> ValueT:
         """
