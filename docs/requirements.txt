@@ -1,0 +1,6 @@
+sphinx_rtd_theme
+sphinx_autodoc_typehints
+
+typing_extensions
+typing_validation
+typed_descriptors

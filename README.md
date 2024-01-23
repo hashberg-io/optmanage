@@ -1,2 +1,0 @@
-# optmanage
-Flexible option managers.
