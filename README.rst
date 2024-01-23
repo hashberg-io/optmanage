@@ -1,5 +1,5 @@
 optmanage: A library to create flexible option managers.
-=================================
+========================================================
 
 .. image:: https://img.shields.io/badge/python-3.10+-green.svg
     :target: https://docs.python.org/3.10/
