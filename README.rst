@@ -48,7 +48,7 @@ You can install the latest release from `PyPI <https://pypi.org/project/optmanag
 Usage
 -----
 
-Custom option manager classes can be created by subclassing :class:`~optmanage.manager.OptionManager` and using the :class:`~optmanage.option.Option` descriptor to set options.
+Custom option manager classes can be created by subclassing `OptionManager <https://optmanage.readthedocs.io/en/latest/api/optmanage.manager.html#optionmanager>`_ and using the `Option <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#option>`_ descriptor to set options.
 An option manager object can then be obtained by instantiating the option manager class:
 
 .. code-block:: python
@@ -102,7 +102,7 @@ Options can be accessed and set like attributes of the ``options`` object:
     options.scaling = {"x": 2.5, "y": 1.5, "z": 1.0}
     print(options.scaling) # {'x': 2.5, 'y': 1.5, 'z': 1.0}
 
-It is possible to set multiple options simultaneously using the :meth:`~optmanage.manager.OptionManager.set` method of the ``options`` object:
+It is possible to set multiple options simultaneously using the `set <https://optmanage.readthedocs.io/en/latest/api/optmanage.manager.html#optmanage.manager.OptionManager.set>`_ method of the ``options`` object:
 
 .. code-block:: python
 
@@ -120,7 +120,7 @@ It is also possible to use the options object as a context manager, for temporar
     print(options.validate) # True
     print(options.eq_atol)  # 0.00000001
 
-All options can be reset to their default values by using the :meth:`~optmanage.manager.OptionManager.reset` method of the ``options`` object:
+All options can be reset to their default values by using the `reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.manager.html#optmanage.manager.OptionManager.reset>`_ method of the ``options`` object:
 
 .. code-block:: python
 
@@ -131,7 +131,7 @@ All options can be reset to their default values by using the :meth:`~optmanage.
     print(options.validate) # True
     print(options.eq_atol)  # 0.00000001
 
-An individual option can be reset to its default value by using the :meth:`~optmanage.option.Option.reset` method of the :class:`~optmanage.option.Option` object, accessed from the option manager class:
+An individual option can be reset to its default value by using the `reset <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#optmanage.option.Option.reset>`_ method of the `Option <https://optmanage.readthedocs.io/en/latest/api/optmanage.option.html#option>`_ object, accessed from the option manager class:
 
 .. code-block:: python
 
