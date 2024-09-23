@@ -64,7 +64,7 @@ An option manager object can then be obtained by instantiating the option manage
         eq_atol = Option(float, 1e-8, lambda x: x >= 0)
         """ Absolute tolerance used for equality comparisons."""
 
-        scaling: Option(
+        scaling = Option(
             Mapping[Literal["x", "y", "z"], float],
             {"x": 1.0, "y": 2.0, "z": 1.0},
             lambda scaling: all(v >= 0 for v in scaling.values())
