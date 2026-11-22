@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import annotationlib
+import builtins
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass
@@ -100,6 +101,11 @@ class ParsedType:
                 "[" + ", ".join(a.crossref(globalns, type_params) for a in args) + "]"
             )
         role = "obj"
+        external = ""
+        if name.startswith("builtins.") and hasattr(builtins, name[9:]):
+            name = name[9:]
+            globalns = {**globalns, name: getattr(builtins, name)}
+            external = "external+python:py:"
         if name in globalns:
             obj = _resolve_lazy(globalns[name])
             if isinstance(obj, ModuleType):
@@ -111,7 +117,7 @@ class ParsedType:
                     role = "class"
             elif isinstance(obj, FunctionType):
                 role = "func"
-        name_crossref = f":{role}:`{name}`"
+        name_crossref = f":{external}{role}:`{name}`"
         if args is None:
             return name_crossref
         if name in ("UnionType", "types.UnionType"):
