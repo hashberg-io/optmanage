@@ -10,7 +10,7 @@ You can install the latest release from `PyPI <https://pypi.org/project/optmanag
 
     $ pip install -U optmanage
 
-The library requires Python 3.15 or later.
+The library requires Python 3.14 or later.
 
 Defining options
 ----------------

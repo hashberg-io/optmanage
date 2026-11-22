@@ -22,13 +22,15 @@ Published on PyPI and Read the Docs; licensed LGPL-3.0-or-later since 2.0.0 (1.x
 
 ## Conventions
 
-- Python 3.15 only; PEP 695 generics, `typing.Self`, one runtime dependency (`typing-validation>=2.2.1`).
+- Python 3.14 and 3.15, both tested locally and in CI; PEP 695 generics, `typing.Self`, one runtime dependency (`typing-validation>=2.2.1`).
 - Inside `Option`, the builtin `type` must be written `builtins.type`, because the `type` property shadows it in the class body (for mypy and for lazy annotation evaluation alike).
 - Docstrings are one sentence; narrative documentation lives in `docs/getting-started.rst` and `README.md`.
-- Docs tooling (`autodoc_typehints.py`, `docs/conf.py`, `docs/make-api.py`) is copied from `hashberg-io/sphinx-docscripts`; Read the Docs builds on Python 3.14 (no 3.15 there yet), so the package source must stay importable on 3.14 (no lazy imports).
+- Docs tooling (`autodoc_typehints.py`, `docs/conf.py`, `docs/make-api.py`) is copied from `hashberg-io/sphinx-docscripts`; Read the Docs builds on Python 3.14, the oldest supported version, so 3.15-only syntax and APIs (such as lazy imports) are off limits.
+  Locally, 3.14 runs as `py -V:3.14-arm64`.
   Rebuild with `python make-api.py`, then `sphinx-build -M html . _build`, from `docs/`.
 
 ## Checks
 
-- `black --check src tests`, `mypy src tests`, `pytest` (all configured in `pyproject.toml`, also run in CI).
+- `black --check src tests`, `mypy src tests`, `pytest` (all configured in `pyproject.toml`, also run in CI on 3.14 and 3.15).
+  mypy targets 3.14 by configuration; also run `mypy --python-version 3.15 src tests`, and run `pytest` under both interpreters.
 - typing-validation 2.2.1 emits a `ByteString` `DeprecationWarning` on import under 3.15; it is fixed upstream on typing-validation's 3.15 branch and is not ours to silence.
