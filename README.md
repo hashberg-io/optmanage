@@ -4,7 +4,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/optmanage.svg)](https://pypi.python.org/pypi/optmanage/)
 [![PyPI status](https://img.shields.io/pypi/status/optmanage.svg)](https://pypi.python.org/pypi/optmanage/)
 [![Checked with Mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](https://github.com/python/mypy)
-[![Documentation Status](https://readthedocs.org/projects/optmanage/badge/?version=latest)](https://optmanage.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://img.shields.io/readthedocs/optmanage/latest)](https://optmanage.readthedocs.io/en/latest/)
 [![Python package status](https://github.com/hashberg-io/optmanage/actions/workflows/python.yml/badge.svg)](https://github.com/hashberg-io/optmanage/actions/workflows/python.yml)
 
 Flexible option managers, supporting options with default values, static type hints, runtime type checking via [typing-validation](https://github.com/hashberg-io/typing-validation), and custom runtime validation logic: options are declared as class attributes of an `OptionManager` subclass, and can be set individually, in bulk, or temporarily within a context.
