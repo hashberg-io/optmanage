@@ -1,13 +1,51 @@
-# pyproject.toml
-[build-system]
-requires = [
-    "setuptools>=63.4.3", # see https://github.com/python/mypy/issues/13392#issuecomment-1212727421
-    "wheel",
-    "setuptools_scm>=6.2"
+[project]
+name = "optmanage"
+dynamic = ["version"]
+authors = [{ name = "Hashberg" }]
+description = "A library to create flexible option managers."
+readme = "README.md"
+requires-python = ">=3.15"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE"]
+dependencies = ["typing-validation>=2.2.1"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.15",
+    "Natural Language :: English",
+    "Typing :: Typed",
 ]
-build-backend = "setuptools.build_meta"
 
-# see https://github.com/pypa/setuptools_scm
-[tool.setuptools_scm]
-version_scheme = "post-release"   # use post-release scheme (default is pre-release of next version)
-local_scheme = "no-local-version" # interferes with PyPI
+[project.urls]
+Documentation = "https://optmanage.readthedocs.io"
+Repository = "https://github.com/hashberg-io/optmanage"
+Issues = "https://github.com/hashberg-io/optmanage/issues"
+
+[build-system]
+requires = ["hatchling == 1.30.1"]
+build-backend = "hatchling.build"
+
+[tool.black]
+target-version = ["py315"]
+
+[tool.mypy]
+python_version = "3.15"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.hatch.version]
+path = "src/optmanage/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src/optmanage"]
+sources = ["src"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/optmanage", "tests", "README.md", "LICENSE"]
+
+[dependency-groups]
+dev = ["mypy", "black", "pytest"]

@@ -3,39 +3,46 @@ Getting Started
 
 .. _getting-started:
 
-You can install the latest release from `PyPI <https://pypi.org/project/optmanage/>`_ as follows:
+Flexible option managers, supporting options with default values, static type hints, runtime type checking, and custom runtime validation logic.
+You can install the latest release from `PyPI <https://pypi.org/project/optmanage/>`_:
 
 .. code-block:: console
 
-    $ pip install --upgrade optmanage
+    $ pip install -U optmanage
 
-Custom option manager classes can be created by subclassing :class:`~optmanage.manager.OptionManager` and using the :class:`~optmanage.option.Option` descriptor to set options.
-An option manager object can then be obtained by instantiating the option manager class:
+The library requires Python 3.15 or later.
+
+Defining options
+----------------
+
+Custom option manager classes are created by subclassing :class:`~optmanage.manager.OptionManager` and using the :class:`~optmanage.option.Option` descriptor to define options as class attributes.
+An option manager is then obtained by instantiating the option manager class:
 
 .. code-block:: python
 
+    from collections.abc import Mapping
+    from typing import Literal
     from optmanage import Option, OptionManager
 
     class MyOptions(OptionManager):
-        """ Options of some library. """
+        """Options of some library."""
 
         validate = Option(bool, True)
-        """ Whether to validate arguments to functions and methods. """
+        """Whether to validate arguments to functions and methods."""
 
         eq_atol = Option(float, 1e-8, lambda x: x >= 0)
-        """ Absolute tolerance used for equality comparisons."""
+        """Absolute tolerance used for equality comparisons."""
 
-        scaling: Option(
+        scaling = Option(
             Mapping[Literal["x", "y", "z"], float],
             {"x": 1.0, "y": 2.0, "z": 1.0},
-            lambda scaling: all(v >= 0 for v in scaling.values())
+            lambda scaling: all(v >= 0 for v in scaling.values()),
         )
-        """ Scaling for coordinate axes used in plots.  """
+        """Scaling for coordinate axes used in plots."""
 
     options = MyOptions()
 
-
-Each option takes a default value, a type, and an optional validator function:
+Each option takes a type, a default value, and an optional validator function:
 
 .. code-block:: python
 
@@ -45,25 +52,41 @@ Each option takes a default value, a type, and an optional validator function:
     eq_atol = Option(float, 1e-8, lambda x: x >= 0)
     #           optional validator ^^^^^^^^^^^^^^^^
 
-Any type supported by the `typing-validation <https://github.com/hashberg-io/typing-validation>`_ library can be used for options, including `PEP 484 <https://peps.python.org/pep-0484/>`_ type hints:
+Any type supported by the `typing-validation <https://github.com/hashberg-io/typing-validation>`_ library can be used for options, including type hints such as ``Mapping[Literal["x", "y", "z"], float]`` above.
+Unsupported types are rejected with :exc:`TypeError` when the option is created, and the default value is validated at the same time.
+
+Validation
+----------
+
+Every value is checked against the type of its option at runtime, and a value of the wrong type is rejected with :exc:`TypeError`.
+If a validator is given, it is then called on the value, which is rejected with :exc:`ValueError` if the validator returns :obj:`False` or raises an exception; in the latter case, the :exc:`ValueError` is raised from the validator's exception.
+Any other return value, including :obj:`None`, accepts the value, so validators can be either predicates or functions which raise on invalid values:
 
 .. code-block:: python
 
-    scaling: Option(
-        Mapping[Literal["x", "y", "z"], float], # <- type hints supported
-        {"x": 1.0, "y": 2.0, "z": 1.0},
-        lambda scaling: all(v >= 0 for v in scaling.values())
-    )
+    def check_tolerance(x: float) -> None:
+        if x < 0:
+            raise ValueError("Tolerance must be non-negative.")
 
-Options can be accessed and set like attributes of the ``options`` object:
+    eq_atol = Option(float, 1e-8, check_tolerance)
+
+Setting options
+---------------
+
+Options can be accessed and set like attributes of the ``options`` object, or by name:
 
 .. code-block:: python
 
     print(options.scaling)  # {'x': 1.0, 'y': 2.0, 'z': 1.0}
     options.scaling = {"x": 2.5, "y": 1.5, "z": 1.0}
-    print(options.scaling) # {'x': 2.5, 'y': 1.5, 'z': 1.0}
+    print(options["scaling"]) # {'x': 2.5, 'y': 1.5, 'z': 1.0}
+    options["eq_atol"] = 1e-6
 
-It is possible to set multiple options simultaneously using the :meth:`~optmanage.manager.OptionManager.set` method of the ``options`` object:
+Access by name raises :exc:`KeyError` for names which are not options.
+Option names and values can be iterated with :meth:`~optmanage.manager.OptionManager.keys`, :meth:`~optmanage.manager.OptionManager.values` and :meth:`~optmanage.manager.OptionManager.items`.
+
+Multiple options can be set together using the :meth:`~optmanage.manager.OptionManager.set` method, which returns the previous values of the options.
+All values are validated before any of them is set, so a failed call leaves every option unchanged:
 
 .. code-block:: python
 
@@ -71,7 +94,11 @@ It is possible to set multiple options simultaneously using the :meth:`~optmanag
     print(options.validate) # False
     print(options.eq_atol)  # 0.001
 
-It is also possible to use the options object as a context manager, for temporary option setting:
+Temporary values
+----------------
+
+The ``options`` object can be called to obtain a context manager which sets options temporarily, restoring their previous values when the context exits, including on exceptions.
+Contexts can be nested:
 
 .. code-block:: python
 
@@ -79,28 +106,49 @@ It is also possible to use the options object as a context manager, for temporar
         print(options.validate) # False
         print(options.eq_atol)  # 0.001
     print(options.validate) # True
-    print(options.eq_atol)  # 0.00000001
+    print(options.eq_atol)  # 1e-08
 
-All options can be reset to their default values by using the :meth:`~optmanage.manager.OptionManager.reset` method of the ``options`` object:
+While an option has a temporary value, it cannot be set or reset permanently: attempting to do so raises :exc:`ValueError`.
+
+Temporary values are stored on the option manager itself, so they are visible to all threads and asynchronous tasks using it.
+Concurrent code which sets temporary values on a shared option manager must coordinate their use, and must exit the contexts in the reverse order of entry.
+
+Resetting options
+-----------------
+
+All options can be reset to their default values with the :meth:`~optmanage.manager.OptionManager.reset` method, which returns their previous values:
 
 .. code-block:: python
 
     options.set(validate=False, eq_atol=1e-3)
-    print(options.validate) # False
-    print(options.eq_atol)  # 0.001
     options.reset()
     print(options.validate) # True
-    print(options.eq_atol)  # 0.00000001
+    print(options.eq_atol)  # 1e-08
 
-An individual option can be reset to its default value by using the :meth:`~optmanage.option.Option.reset` method of the :class:`~optmanage.option.Option` object, accessed from the option manager class:
+An individual option can be reset with the :meth:`~optmanage.option.Option.reset` method of the :class:`~optmanage.option.Option` object, accessed from the option manager class:
 
 .. code-block:: python
 
     options.set(validate=False, eq_atol=1e-3)
-    print(options.validate) # False
-    print(options.eq_atol)  # 0.001
     MyOptions.eq_atol.reset(options) # resets 'eq_atol' on the 'options' object
-    print(options.validate) # True
-    print(options.eq_atol)  # 0.001
+    print(options.validate) # False
+    print(options.eq_atol)  # 1e-08
+
+Inheritance
+-----------
+
+Option manager classes inherit the options of their option manager base classes, including under multiple inheritance.
+Class definitions which would make the options of a class ambiguous raise :exc:`TypeError`, namely:
+
+- defining an option with the same name as an inherited option, or as an attribute of :class:`~optmanage.manager.OptionManager` (such as ``set`` or ``keys``);
+- inheriting distinct options with the same name from different base classes;
+- overriding an inherited option with an attribute which is not that option;
+- binding the same :class:`~optmanage.option.Option` object more than once, or binding it to a class which is not a subclass of :class:`~optmanage.manager.OptionManager`.
+
+Copying and pickling
+--------------------
+
+Option managers support :mod:`copy` and :mod:`pickle`.
+The copy holds the permanent values of the options, without the temporary values of any active context, and is independent of the original.
 
 GitHub repo: https://github.com/hashberg-io/optmanage

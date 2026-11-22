@@ -10,3 +10,4 @@ The following members were explicitly reexported using ``__all__``:
 
     - :py:class:`optmanage.option.Option`
     - :py:class:`optmanage.manager.OptionManager`
+    - :py:class:`optmanage.option.Validator`

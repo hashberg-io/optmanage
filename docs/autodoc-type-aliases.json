@@ -1,3 +1,4 @@
 {
-    "OptionManager": "optmanage.manager.OptionManager"
+    "OptionManager": "optmanage.manager.OptionManager",
+    "OptionState": "optmanage.manager.OptionState"
 }

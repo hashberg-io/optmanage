@@ -1,6 +1,6 @@
 {
     "pkg_name": "optmanage",
-    "pkg_path": "..",
+    "pkg_path": "../src",
     "apidocs_folder": "api",
     "toc_filename": "api-toc.rst",
     "type_alias_dict_filename": "autodoc-type-aliases.json",
@@ -12,7 +12,5 @@
     "include_modules": [],
     "exclude_modules": [],
     "member_fullnames": {},
-    "special_class_members": {
-        "optmanage.ExampleClass": ["__repr__"]
-    }
+    "special_class_members": {}
 }

@@ -46,31 +46,24 @@ You should [link your pull request to the issue(s)](https://docs.github.com/en/i
 
 ### Continuous Integration
 
-You can perform continuous integration checks on all supported versions by running [tox](https://tox.readthedocs.io/en/latest/) in the main project folder:
+Continuous integration involves the following individual checks, all configured in `pyproject.toml`:
+
+1. formatting with [Black](https://github.com/psf/black):
 
 ```
-tox
-```
-
-Continuous integration involves the following individual checks:
-
-1. testing with [pytest](https://docs.pytest.org/):
-
-```
-pytest
+black --check src tests
 ```
 
 2. static type-checking with [mypy](http://mypy-lang.org/):
 
 ```
-mypy --strict optmanage
+mypy src tests
 ```
 
-3. linting with [pylint](https://www.pylint.org/):
+3. testing with [pytest](https://docs.pytest.org/):
 
 ```
-pylint --errors-only optmanage
-pylint --exit-zero optmanage
+pytest
 ```
 
 Whenever relevant, please consider contributing some additional tests pertaining to your implementation.
@@ -86,7 +79,7 @@ docs>make clean
 docs>make html
 ```
 
-The script `make-api-clean-html.bat` automates the procedure on Windows. If you edit the [readme page](README.rst), please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
+The script `make-api-clean-html.bat` automates the procedure on Windows.
 
 
 ### Code Formatting
@@ -94,5 +87,5 @@ The script `make-api-clean-html.bat` automates the procedure on Windows. If you 
 Code should be formatted by [Black](https://github.com/psf/black):
 
 ```
-black -l 80 -t py38 -t py39 -t py310 -t py311 -t py312 .\optmanage
+black src tests
 ```
