@@ -1,6 +1,5 @@
+sphinx>=7.4
 sphinx_rtd_theme
 sphinx_autodoc_typehints
-
 typing_extensions
-typing_validation
-typed_descriptors
+typing_validation>=2.2.1
