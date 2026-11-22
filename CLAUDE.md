@@ -15,6 +15,9 @@ Published on PyPI and Read the Docs; licensed LGPL-3.0-or-later since 2.0.0 (1.x
   Permanent changes to an option with a temporary value raise `ValueError`.
 - Copy and pickle go through `__getstate__`/`__setstate__`, which carry the permanent values only (temporary values are dropped) plus any instance `__dict__`; `__setstate__` revalidates.
 - Temporary values are shared across threads and tasks (documented limitation, chosen over contextvars during the 2.0.0 refresh); contexts must exit in reverse order of entry.
+- Typo safety: `__setattr__` accepts only options, the internal slots, and names declared by a subclass (in `vars` of a non-`OptionManager` class in the MRO, or in its annotations, read with `annotationlib` in `STRING` format and cached in `__declared` at class creation).
+  It raises `AttributeError` with `name` and `obj`, so Python adds "Did you mean" hints; the message has no trailing full stop because Python appends one.
+  It is defined under `if not TYPE_CHECKING:` because a visible `__setattr__` makes mypy accept assignment to any attribute, which would lose static typo detection.
 - Misuse raises exceptions, never `assert`.
 
 ## Conventions

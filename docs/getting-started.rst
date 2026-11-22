@@ -83,6 +83,26 @@ Options can be accessed and set like attributes of the ``options`` object, or by
     options["eq_atol"] = 1e-6
 
 Access by name raises :exc:`KeyError` for names which are not options.
+
+Assigning to an attribute which is neither an option nor declared by the class raises :exc:`AttributeError`, so that misspelt option names are not silently accepted:
+
+.. code-block:: python
+
+    options.valdiate = False
+    # AttributeError: 'MyOptions' has no option 'valdiate', and other attributes
+    # must be declared by the class. Did you mean '.validate' instead of '.valdiate'?
+
+Subclasses which need further instance attributes declare them in the class body, as annotations, slots, properties or class attributes:
+
+.. code-block:: python
+
+    class MyLabelledOptions(MyOptions):
+        label: str
+
+        def __init__(self, label: str) -> None:
+            self.label = label
+
+Names which belong to :class:`~optmanage.manager.OptionManager` itself, such as ``set`` or ``keys``, cannot be assigned on instances.
 Option names and values can be iterated with :meth:`~optmanage.manager.OptionManager.keys`, :meth:`~optmanage.manager.OptionManager.values` and :meth:`~optmanage.manager.OptionManager.items`.
 
 Multiple options can be set together using the :meth:`~optmanage.manager.OptionManager.set` method, which returns the previous values of the options.

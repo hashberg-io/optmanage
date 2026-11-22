@@ -18,9 +18,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library.  If not, see <https://www.gnu.org/licenses/>.
 
+import annotationlib
 from collections.abc import Collection, Generator, Iterator, Mapping
 from contextlib import contextmanager
-from typing import Any, ClassVar, Final, Self, final
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Self, final
 from .option import Option
 
 
@@ -46,6 +47,12 @@ class OptionManager:
 
     __options: ClassVar[Mapping[str, Option[Any]]] = {}
     """Options of the option manager class, by name."""
+
+    __declared: ClassVar[frozenset[str]] = frozenset()
+    """Attribute names declared by the option manager class and its bases."""
+
+    __internal: Final = frozenset({"_OptionManager__values", "_OptionManager__saved"})
+    """Attribute names of the internal state of option managers."""
 
     __values: dict[str, Any]
     """Explicitly set option values, by option name."""
@@ -83,6 +90,15 @@ class OptionManager:
                 )
             options[name] = member
         cls.__options = options
+        declared: set[str] = set()
+        for base in cls.__mro__:
+            if base is OptionManager or base is object:
+                continue
+            declared.update(vars(base))
+            declared.update(
+                annotationlib.get_annotations(base, format=annotationlib.Format.STRING)
+            )
+        cls.__declared = frozenset(declared)
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         """Creates an option manager with all options at their default values."""
@@ -180,6 +196,35 @@ class OptionManager:
         :meta public:
         """
         self._set_values({name: value})
+
+    if not TYPE_CHECKING:
+
+        def __setattr__(self, name: str, value: Any) -> None:
+            """
+            Sets an option or a declared attribute.
+
+            :raises AttributeError: if the name is neither an option nor declared.
+
+            :meta public:
+            """
+            cls = type(self)
+            if (
+                name not in cls.__options
+                and name not in cls.__declared
+                and name not in OptionManager.__internal
+                and not any(
+                    name in vars(base)
+                    for base in cls.__mro__
+                    if base is not OptionManager and base is not object
+                )
+            ):
+                raise AttributeError(
+                    f"{cls.__name__!r} has no option {name!r}, and other attributes "
+                    "must be declared by the class",
+                    name=name,
+                    obj=self,
+                )
+            object.__setattr__(self, name, value)
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({dict(self.items())!r})"

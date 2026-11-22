@@ -288,6 +288,8 @@ def test_copy_and_pickle() -> None:
 
 def test_copy_with_instance_attributes() -> None:
     class AttrOptions(MyOptions):
+        label: str
+
         def __init__(self) -> None:
             self.label = "x"
 
@@ -295,6 +297,70 @@ def test_copy_with_instance_attributes() -> None:
     options.validate = False
     copied = copy.deepcopy(options)
     assert copied.label == "x" and copied.validate is False
+
+
+def test_typo_rejected() -> None:
+    options = MyOptions()
+    with pytest.raises(AttributeError) as exc_info:
+        options.valdiate = False  # type: ignore[attr-defined]
+    assert exc_info.value.name == "valdiate"
+    assert exc_info.value.obj is options
+    assert options.validate is True
+
+
+@pytest.mark.parametrize("name", ["keys", "set", "__class__", "__weakref__"])
+def test_manager_attributes_rejected(name: str) -> None:
+    with pytest.raises(AttributeError):
+        setattr(MyOptions(), name, 1)
+
+
+def test_declared_attributes_accepted() -> None:
+    class DeclOptions(MyOptions):
+        label: str
+        count = 0
+        __hidden: int
+
+        def __init__(self) -> None:
+            self.label = "x"
+            self.count = 1
+            self.__hidden = 2
+
+        @property
+        def hidden(self) -> int:
+            return self.__hidden
+
+        @hidden.setter
+        def hidden(self, value: int) -> None:
+            self.__hidden = value
+
+    class SubDeclOptions(DeclOptions):
+        pass
+
+    options = SubDeclOptions()
+    options.hidden = 3
+    assert (options.label, options.count, options.hidden) == ("x", 1, 3)
+    with pytest.raises(AttributeError):
+        options.lable = "y"  # type: ignore[attr-defined]
+
+
+def test_slotted_attributes_accepted() -> None:
+    class SlotOptions(MyOptions):
+        __slots__ = ("label",)
+
+    options = SlotOptions()
+    options.label = "x"  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        options.other = 1  # type: ignore[attr-defined]
+
+
+def test_attribute_added_to_class_later() -> None:
+    class LateOptions(MyOptions):
+        pass
+
+    LateOptions.extra = 0  # type: ignore[attr-defined]
+    options = LateOptions()
+    options.extra = 1  # type: ignore[attr-defined]
+    assert options.extra == 1  # type: ignore[attr-defined]
 
 
 def test_getting_started_example() -> None:

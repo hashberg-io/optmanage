@@ -57,7 +57,10 @@ print(options.scaling)  # {'x': 1.0, 'y': 2.0, 'z': 1.0}
 options.scaling = {"x": 2.5, "y": 1.5, "z": 1.0}
 options["eq_atol"] = 1e-6
 options.eq_atol = -1.0  # ValueError
+options.valdiate = False  # AttributeError: did you mean '.validate'?
 ```
+
+Attributes other than options must be declared by the class, for example as annotations, so that misspelt option names are rejected rather than silently creating new attributes.
 
 Several options can be set at once with `set`, which validates all values before setting any, and all options can be reset to their defaults with `reset`:
 
